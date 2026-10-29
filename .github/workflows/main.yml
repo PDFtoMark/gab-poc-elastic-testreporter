@@ -1,0 +1,24 @@
+name: main
+on:
+  pull_request:
+jobs:
+  fake:
+    runs-on: ubuntu-latest
+    steps:
+      - name: produce attacker-controlled test-results artifact
+        run: |
+          mkdir -p out
+          cat > out/results.xml <<'X'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <testsuites time="0.01">
+            <testsuite name="AttackerSuite" tests="1" failures="1" time="0.01">
+              <testcase classname="AttackerSuite" name="injected-check-name-and-body" time="0.01">
+                <failure message="ATTACKER-CONTROLLED-CHECK-BODY" type="java.lang.RuntimeException">at Attacker.fake(Attacker.java:1)</failure>
+              </testcase>
+            </testsuite>
+          </testsuites>
+          X
+      - uses: actions/upload-artifact@v4
+        with:
+          name: test-results-PWNED
+          path: out/results.xml
